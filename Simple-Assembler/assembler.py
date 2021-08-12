@@ -9,38 +9,73 @@ opDict = {'add': ['00000', 'A'], 'sub': ['00001', 'A'], 'mov_imm': ['00010', 'B'
 regAdd = {'R0': '000', 'R1': '001', 'R2': '010', 'R3': '011', 'R4': '100', 'R5': '101', 'R6': '110',
           'FLAGS': '111'}
 
+labels = {}
+
+line_dict = {}
+
 pc = 0
+
+'''for line in stdin:
+    if line == '':
+        continue
+    else:
+        line_lst = line.split("\n")
+        for i in line_lst:
+            if 'var' in i:
+                line_lst.append(line_lst.pop(line_lst.index(i)))
+
+for j in line_lst:
+    line_dict[i] = line_lst.index(i)
 
 for line in stdin:
     if line == '':
         continue
     else:
-        line = line.strip()
-        line = line.split()
-        if line[0] in opDict.keys():
-            inst = line[0]
+        count_lst = line.split("\n")
+        for i in count_lst:
+            if 'var' in i:
+                var_lst.append(i)'''
+
+
+def main():
+    for line in stdin:
+        if line == '':
+            continue
         else:
-            print('Invalid instruction, check for typos')
-        if len(line) == 2:
-            mem_add = line[1]
-        elif len(line) == 3:
-            reg1 = line[1]
-            if '$' in line[2]:
-                num = line[2]
-                imm = int(num.replace('$', ''))
-            elif line[2] in regAdd.keys():
-                reg2 = line[2]
+            line = line.strip()
+            line = line.split()
+            if line[0] in opDict.keys():
+                inst = line[0]
             else:
-                mem_add = int(line[2])
-        elif len(line) == 4:
-            reg1 = line[1]
-            reg2 = line[2]
-            reg3 = line[3]
-        elif len(line) > 4:
-            print('Too many operands')
+                print('Invalid instruction, check for typos')
+                exit()
+            if len(line) == 2:
+                mem_add = line[1]
+                if line[1] in opDict.keys():
+                    print('Syntax Error: Found Instruction instead of Operand')
+                    exit()
+            elif len(line) == 3:
+                reg1 = line[1]
+                if '$' in line[2]:
+                    num = line[2]
+                    imm = int(num.replace('$', ''))
+                elif line[2] in regAdd.keys():
+                    reg2 = line[2]
+                else:
+                    mem_add = int(line[2])
+            elif len(line) == 4:
+                reg1 = line[1]
+                reg2 = line[2]
+                reg3 = line[3]
+            elif len(line) > 4:
+                print('Too many operands')
+                exit()
+if __name__=="__main__":
+    main()
 
 if imm < 0 or imm > 255:
     print('Illegal Immediate Values')
+    exit()
 
 '''line = input()     #this is just to check the code by giving inputs
 line = line.strip()
@@ -61,6 +96,7 @@ elif len(line) == 4:
     reg1 = line[1]
     reg2 = line[2]
     reg3 = line[3]'''
+
 
 def typeA(inst, reg1, reg2, reg3):
     if inst in opDict.keys():
@@ -122,24 +158,8 @@ if inst.lower() == 'mov':
         ist = 'mov_reg'
         typeC(ist, reg1, reg2)
 
-
-'''if inst.lower() == 'add':   #was trying something but inefficient
-    typeA(inst, reg1, reg2)
-
-if inst.lower() == 'sub':
-    typeA(inst, reg1, reg2)
-    
-if inst.lower() == 'ld':
-    typeD(inst, reg1, mem_add)
-
-if inst.lower() == 'st':
-    typeD(inst, reg1, mem_add)
-
-if inst.lower() == 'mul':
-    typeA(inst, reg1, reg2, reg3)
-    
-if inst.lower() == 'div':
-    typeC(inst, reg1, reg2)
-    
-if inst.lower() == 'rs':
-    typeB(inst, reg1, imm)'''
+'''4  var x
+   0  mov r3 5
+   1  mov r2 2
+   2  add r2 r3 r2
+   3  ld r3 var x 00010000010100000100'''
