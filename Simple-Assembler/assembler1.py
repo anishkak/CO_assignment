@@ -26,7 +26,7 @@ def main():
             line = input()
             line = line.strip()
             if line == "":
-                break
+                continue
             line_lst.append(line)
         except EOFError:
             break
