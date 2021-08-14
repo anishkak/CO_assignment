@@ -12,12 +12,15 @@ def main():
     line_lst = []
     var_lst = []
     lbl_lst = []
+    typeA_list=['add','sub','mul','xor','or','and']
+    typeC_list=['div','not','cmp']
+    typeD_list=['ld','st']
     while True:
         try:
             line = input()
             line = line.strip()
             if line == "":
-                continue
+                break
             line_lst.append(line)
         except EOFError:
             break
@@ -27,17 +30,27 @@ def main():
         line = i.split()
 
 
-        if line[0] == 'add' or line[0] == 'sub' or line[0] == 'mul' or line[0] == 'xor' or line[0] == 'or' or line[0] == 'and':
-            if len(line)>=4:
-                inst = line[0]
-                reg1 = line[1]
-                reg2 = line[2]
-                reg3 = line[3]
+        for element in typeA_list:
+            if element in line:
+                index_add=line.index(element)
+                inst = line[index_add]
+                list_add=[]
+                for i in range(1,4):
+                    if line[index_add+i] in regAdd.keys():
+                        list_add.append(line[index_add+i])
+                    else:
+                        print("Error: register not found")
+                        exit()
+                if len(list_add)==3:
+                    reg1=list_add[0]
+                    reg2=list_add[1]
+                    reg3=list_add[2]
+                else:
+                    print("invalid syntax")
+                    exit()
+                
                 typeA(inst, reg1, reg2, reg3)       
-            else:
-                print("error: incorrect instruction syntax")
-
-
+ 
         if line[0] == 'rs' or line[0] == 'ls':
             if len(line)>=3:
                 inst = line[0]
@@ -51,21 +64,40 @@ def main():
                 print("error: incorrect instruction syntax")
 
 
-        if line[0] == 'div' or line[0] == 'not' or line[0] == 'cmp':
-            
-            inst = line[0]
-            reg1 = line[1]
-            reg2 = line[2]
-            typeC(inst, reg1, reg2)
+        for element in typeC_list:
+            if element in line:
+                index_add=line.index(element)
+                inst = line[index_add]
+                list_add=[]
+                for i in range(1,3):
+                    if line[index_add+i] in regAdd.keys():
+                        list_add.append(line[index_add+i])
+                    else:
+                        print("Error: register not found")
+                        exit()
+                if len(list_add)==2:
+                    reg1=list_add[0]
+                    reg2=list_add[1]
+                else:
+                    print("invalid syntax")
+                    exit()
+                
+                typeC(inst, reg1, reg2)
 
 
-        if line[0] == 'ld' or line[0] == 'st':
-            inst = line[0]
-            reg1 = line[1]
-            var = line[2]
-            for k in var_lst:
-                if k == var:
-                    typeD(inst, reg1, getVar(line_lst, var))
+        for element in typeD_list:
+            if element in line:
+                index_add=line.index(element)
+                inst = line[index_add]
+                if line[index_add+1] in regAdd:
+                    reg1 = line[1]
+                else:
+                    print("Error: register not found")
+                    exit()
+                var = line[index_add+2]
+                for k in var_lst:
+                    if k == var:
+                        typeD(inst, reg1, getVar(line_lst, var))
 
 
         if line[0] == 'jmp' or line[0] == 'jlt' or line[0] == 'jgt' or line[0] == 'je':
@@ -101,6 +133,7 @@ def main():
                 for element in opDict.keys():
                     if element+":" == k:
                         print("Error: cannot use instructions as label names")
+                        exit()
                 lbl_lst.append(k)
 
 
