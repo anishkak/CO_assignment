@@ -13,6 +13,7 @@ def main():
     var_lst = []
     lbl_lst = []
     typeA_list=['add','sub','mul','xor','or','and']
+    typeB_list=['ls','rs']
     typeC_list=['div','not','cmp']
     typeD_list=['ld','st']
     typeE_list=['jmp','je','jgt','jlt']
