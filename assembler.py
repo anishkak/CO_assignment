@@ -17,7 +17,7 @@ def main():
             line = input()
             line = line.strip()
             if line == "":
-                break
+                continue
             line_lst.append(line)
         except EOFError:
             break
@@ -28,24 +28,31 @@ def main():
 
 
         if line[0] == 'add' or line[0] == 'sub' or line[0] == 'mul' or line[0] == 'xor' or line[0] == 'or' or line[0] == 'and':
-            inst = line[0]
-            reg1 = line[1]
-            reg2 = line[2]
-            reg3 = line[3]
-            typeA(inst, reg1, reg2, reg3)
+            if len(line)>=4:
+                inst = line[0]
+                reg1 = line[1]
+                reg2 = line[2]
+                reg3 = line[3]
+                typeA(inst, reg1, reg2, reg3)       
+            else:
+                print("error: incorrect instruction syntax")
 
 
         if line[0] == 'rs' or line[0] == 'ls':
-            inst = line[0]
-            reg1 = line[1]
-            if '$' in line[2]:
+            if len(line)>=3:
                 inst = line[0]
-                num = line[2]
-                imm = int(num.replace('$', ''))
-            typeB(inst, reg1, imm)
+                reg1 = line[1]
+                if '$' in line[2]:
+                    inst = line[0]
+                    num = line[2]
+                    imm = int(num.replace('$', ''))
+                typeB(inst, reg1, imm)
+            else:
+                print("error: incorrect instruction syntax")
 
 
         if line[0] == 'div' or line[0] == 'not' or line[0] == 'cmp':
+            
             inst = line[0]
             reg1 = line[1]
             reg2 = line[2]
@@ -91,6 +98,9 @@ def main():
 
         for k in line:
             if ':' in k:
+                for element in opDict.keys():
+                    if element+":" == k:
+                        print("Error: cannot use instructions as label names")
                 lbl_lst.append(k)
 
 
