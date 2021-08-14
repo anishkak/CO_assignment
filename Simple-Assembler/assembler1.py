@@ -52,12 +52,14 @@ def main():
             if 'var' not in line[0] and ':' not in line[0]:
                 print("Syntax Error in line " + line[-1])
                 exit()
-
         for element in typeA_list:
             if element in line:
                 index_add = line.index(element)
                 inst = line[index_add]
                 list_add = []
+                if line[index_add+4] != line[-1]:
+                    print('General Syntax Error at line ' + line[-1])
+                    exit()
                 for i in range(1, 4):
                     if line[index_add + i] in regAdd.keys():
                         if line[index_add + i] == 'FLAGS':
@@ -81,6 +83,9 @@ def main():
             if element in line:
                 index_add = line.index(element)
                 inst = line[index_add]
+                if line[index_add+3] != line[-1]:
+                    print('General Syntax Error at line ' + line[-1])
+                    exit()
                 if line[index_add + 1] in regAdd:
                     if line[index_add + i] == 'FLAGS':
                         print("Error at line " + line[-1] + ": Illegal use of FLAGS")
@@ -92,6 +97,9 @@ def main():
                 if '$' in line[index_add + 2]:
                     num = line[index_add + 2]
                     imm = int(num.replace('$', ''))
+                    if imm < 0 or imm > 255:
+                        print("Error at line " + line[-1]+": Immediate value out of range")
+                        exit()
                 else:
                     print("Error at line" + line[-1] + ": invalid syntax")
                     exit()
@@ -102,6 +110,9 @@ def main():
                 index_add = line.index(element)
                 inst = line[index_add]
                 list_add = []
+                if line[index_add+3] != line[-1]:
+                    print('General Syntax Error at line ' + line[-1])
+                    exit()
                 for i in range(1, 3):
                     if line[index_add + i] in regAdd.keys():
                         if line[index_add + i] == 'FLAGS':
@@ -124,6 +135,9 @@ def main():
             if element in line:
                 index_add = line.index(element)
                 inst = line[index_add]
+                if line[index_add+3] != line[-1]:
+                    print('General Syntax Error at line ' + line[-1])
+                    exit()
                 if line[index_add + 1] in regAdd:
                     if line[index_add + 1] == 'FLAGS':
                         print("Error at line " + line[-1] + ": Illegal use of FLAGS")
@@ -133,8 +147,10 @@ def main():
                     print("Error at line " + line[-1]+": register not found")
                     exit()
                 var = line[index_add + 2]
+                if var in lbl_lst:
+                    print('Error at line: ' + line[-1] + ' Misuse of label')
                 if var not in var_lst:
-                    print('Error at line: ' + line[-1] + 'Undefined Variable')
+                    print('Error at line: ' + line[-1] + ' Undefined Variable')
                     exit()
                 for k in var_lst:
                     if k == var:
@@ -143,15 +159,25 @@ def main():
         for element in typeE_list:
             if element in line:
                 index_add = line.index(element)
+                if line[index_add+2] != line[-1]:
+                    print('General Syntax Error at line ' + line[-1])
+                    exit()
                 inst = line[index_add]
                 lab = line[index_add + 1] + ':'
+                if lab not in lbl_lst:
+                    print('Error at line: ' + line[-1] + ' Undefined Label')
+                    exit()
                 for k in line_lst:
                     if lab in k:
                         typeE(inst, getLbl(line_lst, k))
 
+
         for element in typeF_list:
             if element in line:
                 index_add = line.index(element)
+                if line[index_add+1] != line[-1]:
+                    print('General Syntax Error at line ' + line[-1])
+                    exit()
                 inst = line[index_add]
                 if int(line[-1]) == len(line_lst):
                     typeF(inst)
@@ -163,6 +189,9 @@ def main():
         for element in typeM_list:
             if element in line:
                 index_add = line.index(element)
+                if line[index_add+3] != line[-1]:
+                    print('General Syntax Error at line ' + line[-1])
+                    exit()
                 if line[index_add + 1] in regAdd:
                     if line[index_add+1] != 'FLAGS':
                         reg1 = line[index_add+1]
@@ -182,9 +211,6 @@ def main():
                     typeB(inst, reg1, imm)
                 elif line[index_add + 1] in regAdd:
                     inst = 'mov_reg'
-                    if line[index_add + 2] == 'FLAGS':
-                        print("Error at line " + line[-1] + ": Illegal use of FLAGS")
-                        exit()
                     reg2 = line[index_add+2]
                     typeC(inst, reg1, reg2)
                 else:
