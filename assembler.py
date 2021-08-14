@@ -15,6 +15,8 @@ def main():
     typeA_list=['add','sub','mul','xor','or','and']
     typeC_list=['div','not','cmp']
     typeD_list=['ld','st']
+    typeE_list=['jmp','je','jgt','jlt']
+    typeF_list=['hlt']
     while True:
         try:
             line = input()
@@ -51,17 +53,23 @@ def main():
                 
                 typeA(inst, reg1, reg2, reg3)       
  
-        if line[0] == 'rs' or line[0] == 'ls':
-            if len(line)>=3:
-                inst = line[0]
-                reg1 = line[1]
-                if '$' in line[2]:
-                    inst = line[0]
-                    num = line[2]
+        for element in typeB_list:
+            if element in line:
+                index_add=line.index(element)
+                inst = line[index_add]
+                if line[index_add+1] in regAdd:
+                    reg1 = line[1]
+                else:
+                    print("Error: register not found")
+                    exit()
+                if '$' in line[index_add+2]:
+                    num = line[index_add+2]
                     imm = int(num.replace('$', ''))
+                else:
+                    print("Error: invalid syntax")
+                    exit()
                 typeB(inst, reg1, imm)
-            else:
-                print("error: incorrect instruction syntax")
+            
 
 
         for element in typeC_list:
@@ -100,17 +108,21 @@ def main():
                         typeD(inst, reg1, getVar(line_lst, var))
 
 
-        if line[0] == 'jmp' or line[0] == 'jlt' or line[0] == 'jgt' or line[0] == 'je':
-            inst = line[0]
-            lab = line[1] + ':'
-            for k in lbl_lst:
-                if lab == k:
-                    typeE(inst, getLbl(line_lst, k))
+        for element in typeE_list:
+            if element in line:
+                index_add=line.index(element)
+                inst = line[index_add]
+                lab = line[index_add+1] + ':'
+                for k in lbl_lst:
+                    if lab == k:
+                        typeE(inst, getLbl(line_lst, k))
 
 
-        if line[0] == 'hlt':
-            inst = line[0]
-            typeF(inst)
+        for element in typeF_list:
+            if element in line:
+                index_add=line.index(element)
+                inst = line[index_add]
+                typeF(inst)
 
 
         if line[0] == 'mov':
