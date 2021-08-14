@@ -4,6 +4,9 @@ opDict = {'add': ['00000', 'A'], 'sub': ['00001', 'A'], 'mov_imm': ['00010', 'B'
           'and': ['01100', 'A'], 'not': ['01101', 'C'], 'cmp': ['01110', 'C'], 'jmp': ['01111', 'E'],
           'jlt': ['10000', 'E'], 'jgt': ['10001', 'E'], 'je': ['10010', 'E'], 'hlt': ['10011', 'F']}
 
+inst_list = ['add', 'sub', 'mov', 'ld', 'st', 'mul', 'div', 'rs', 'ls', 'xor', 'or', 'and', 'not', 'cmp',
+             'jmp', 'jlt', 'jgt', 'je', 'hlt']
+
 regAdd = {'R0': '000', 'R1': '001', 'R2': '010', 'R3': '011', 'R4': '100', 'R5': '101', 'R6': '110',
           'FLAGS': '111'}
 
@@ -19,15 +22,16 @@ def main():
     typeE_list = ['jmp', 'je', 'jgt', 'jlt']
     typeF_list = ['hlt']
     typeM_list = ['mov']
-    typeV_list = ['var']
-
+    i = 0
     while True:
         try:
             line = input()
+            i += 1
             line = line.strip()
             if line == "":
-                continue
-            line_lst.append(line)
+                break
+            line_lst.append(line+" "+str(i))
+            
         except EOFError:
             break
 
@@ -43,6 +47,12 @@ def main():
         i = i.strip()
         line = i.split()
 
+
+        if line[0] not in inst_list:
+            if 'var' not in line[0] and ':' not in line[0]:
+                print("Syntax Error in line " + line[-1])
+                exit()
+
         for element in typeA_list:
             if element in line:
                 index_add = line.index(element)
@@ -50,16 +60,19 @@ def main():
                 list_add = []
                 for i in range(1, 4):
                     if line[index_add + i] in regAdd.keys():
+                        if line[index_add + i] == 'FLAGS':
+                            print("Error at line " + line[-1]+": Illegal use of FLAGS")
+                            exit()
                         list_add.append(line[index_add + i])
                     else:
-                        print("Error: register not found")
+                        print("Error at line " + line[-1]+": register not found")
                         exit()
                 if len(list_add) == 3:
                     reg1 = list_add[0]
                     reg2 = list_add[1]
                     reg3 = list_add[2]
                 else:
-                    print("invalid syntax")
+                    print("Error at line" + line[-1] + ": invalid syntax")
                     exit()
 
                 typeA(inst, reg1, reg2, reg3)
@@ -69,15 +82,18 @@ def main():
                 index_add = line.index(element)
                 inst = line[index_add]
                 if line[index_add + 1] in regAdd:
+                    if line[index_add + i] == 'FLAGS':
+                        print("Error at line " + line[-1] + ": Illegal use of FLAGS")
+                        exit()
                     reg1 = line[index_add+1]
                 else:
-                    print("Error: register not found")
+                    print("Error at line " + line[-1]+": register not found")
                     exit()
                 if '$' in line[index_add + 2]:
                     num = line[index_add + 2]
                     imm = int(num.replace('$', ''))
                 else:
-                    print("Error: invalid syntax")
+                    print("Error at line" + line[-1] + ": invalid syntax")
                     exit()
                 typeB(inst, reg1, imm)
 
@@ -88,15 +104,18 @@ def main():
                 list_add = []
                 for i in range(1, 3):
                     if line[index_add + i] in regAdd.keys():
+                        if line[index_add + i] == 'FLAGS':
+                            print("Error at line " + line[-1]+": Illegal use of FLAGS")
+                            exit()
                         list_add.append(line[index_add + i])
                     else:
-                        print("Error: register not found")
+                        print("Error at line " + line[-1]+": register not found")
                         exit()
                 if len(list_add) == 2:
                     reg1 = list_add[0]
                     reg2 = list_add[1]
                 else:
-                    print("invalid syntax")
+                    print("Error at line" + line[-1] + ": invalid syntax")
                     exit()
 
                 typeC(inst, reg1, reg2)
@@ -106,11 +125,17 @@ def main():
                 index_add = line.index(element)
                 inst = line[index_add]
                 if line[index_add + 1] in regAdd:
+                    if line[index_add + 1] == 'FLAGS':
+                        print("Error at line " + line[-1] + ": Illegal use of FLAGS")
+                        exit()
                     reg1 = line[1]
                 else:
-                    print("Error: register not found")
+                    print("Error at line " + line[-1]+": register not found")
                     exit()
                 var = line[index_add + 2]
+                if var not in var_lst:
+                    print('Error at line: ' + line[-1] + 'Undefined Variable')
+                    exit()
                 for k in var_lst:
                     if k == var:
                         typeD(inst, reg1, getVar(line_lst, var))
@@ -128,27 +153,42 @@ def main():
             if element in line:
                 index_add = line.index(element)
                 inst = line[index_add]
-                typeF(inst)
+                if int(line[-1]) == len(line_lst):
+                    typeF(inst)
+                else:
+                    print("Error: hlt not being used as the last instruction")
+                    exit()
+
 
         for element in typeM_list:
             if element in line:
                 index_add = line.index(element)
                 if line[index_add + 1] in regAdd:
-                    reg1 = line[index_add+1]
+                    if line[index_add+1] != 'FLAGS':
+                        reg1 = line[index_add+1]
+                    else:
+                        print("Error at line " + line[-1]+": Illegal use of FLAGS")
+                        exit()
                 else:
-                    print("Error: register not found")
+                    print("Error at line " + line[-1]+": register not found")
                     exit()
                 if '$' in line[index_add + 2]:
                     inst = 'mov_imm'
                     num = line[index_add + 2]
                     imm = int(num.replace('$', ''))
+                    if imm < 0 or imm > 255:
+                        print("Error at line " + line[-1]+": Immediate value out of range")
+                        exit()
                     typeB(inst, reg1, imm)
                 elif line[index_add + 1] in regAdd:
                     inst = 'mov_reg'
+                    if line[index_add + 2] == 'FLAGS':
+                        print("Error at line " + line[-1] + ": Illegal use of FLAGS")
+                        exit()
                     reg2 = line[index_add+2]
                     typeC(inst, reg1, reg2)
                 else:
-                    print("Error: invalid syntax")
+                    print("Error at line" + line[-1] + ": invalid syntax")
                     exit()
 
 
@@ -162,6 +202,10 @@ def main():
                         print("Error: cannot use instructions as label names")
                         exit()
                 lbl_lst.append(k)
+
+    if 'hlt' not in line_lst[-1]:
+        print("Error: hlt not being used as the last instruction")
+        exit()
 
 
 def typeA(inst, reg1, reg2, reg3):
