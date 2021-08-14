@@ -12,12 +12,15 @@ def main():
     line_lst = []
     var_lst = []
     lbl_lst = []
-    typeA_list=['add','sub','mul','xor','or','and']
-    typeB_list=['ls','rs']
-    typeC_list=['div','not','cmp']
-    typeD_list=['ld','st']
-    typeE_list=['jmp','je','jgt','jlt']
-    typeF_list=['hlt']
+    typeA_list = ['add', 'sub', 'mul', 'xor', 'or', 'and']
+    typeB_list = ['ls', 'rs']
+    typeC_list = ['div', 'not', 'cmp']
+    typeD_list = ['ld', 'st']
+    typeE_list = ['jmp', 'je', 'jgt', 'jlt']
+    typeF_list = ['hlt']
+    typeM_list = ['mov']
+    typeV_list = ['var']
+
     while True:
         try:
             line = input()
@@ -28,123 +31,134 @@ def main():
         except EOFError:
             break
 
+    for j in line_lst:
+        j = j.strip()
+        chk = j.split()
+        for k in chk:
+            if ':' in k:
+                lbl_lst.append(k)
+
+
     for i in line_lst:
         i = i.strip()
         line = i.split()
 
-
         for element in typeA_list:
             if element in line:
-                index_add=line.index(element)
+                index_add = line.index(element)
                 inst = line[index_add]
-                list_add=[]
-                for i in range(1,4):
-                    if line[index_add+i] in regAdd.keys():
-                        list_add.append(line[index_add+i])
+                list_add = []
+                for i in range(1, 4):
+                    if line[index_add + i] in regAdd.keys():
+                        list_add.append(line[index_add + i])
                     else:
                         print("Error: register not found")
                         exit()
-                if len(list_add)==3:
-                    reg1=list_add[0]
-                    reg2=list_add[1]
-                    reg3=list_add[2]
+                if len(list_add) == 3:
+                    reg1 = list_add[0]
+                    reg2 = list_add[1]
+                    reg3 = list_add[2]
                 else:
                     print("invalid syntax")
                     exit()
-                
-                typeA(inst, reg1, reg2, reg3)       
- 
+
+                typeA(inst, reg1, reg2, reg3)
+
         for element in typeB_list:
             if element in line:
-                index_add=line.index(element)
+                index_add = line.index(element)
                 inst = line[index_add]
-                if line[index_add+1] in regAdd:
-                    reg1 = line[1]
+                if line[index_add + 1] in regAdd:
+                    reg1 = line[index_add+1]
                 else:
                     print("Error: register not found")
                     exit()
-                if '$' in line[index_add+2]:
-                    num = line[index_add+2]
+                if '$' in line[index_add + 2]:
+                    num = line[index_add + 2]
                     imm = int(num.replace('$', ''))
                 else:
                     print("Error: invalid syntax")
                     exit()
                 typeB(inst, reg1, imm)
-            
-
 
         for element in typeC_list:
             if element in line:
-                index_add=line.index(element)
+                index_add = line.index(element)
                 inst = line[index_add]
-                list_add=[]
-                for i in range(1,3):
-                    if line[index_add+i] in regAdd.keys():
-                        list_add.append(line[index_add+i])
+                list_add = []
+                for i in range(1, 3):
+                    if line[index_add + i] in regAdd.keys():
+                        list_add.append(line[index_add + i])
                     else:
                         print("Error: register not found")
                         exit()
-                if len(list_add)==2:
-                    reg1=list_add[0]
-                    reg2=list_add[1]
+                if len(list_add) == 2:
+                    reg1 = list_add[0]
+                    reg2 = list_add[1]
                 else:
                     print("invalid syntax")
                     exit()
-                
-                typeC(inst, reg1, reg2)
 
+                typeC(inst, reg1, reg2)
 
         for element in typeD_list:
             if element in line:
-                index_add=line.index(element)
+                index_add = line.index(element)
                 inst = line[index_add]
-                if line[index_add+1] in regAdd:
+                if line[index_add + 1] in regAdd:
                     reg1 = line[1]
                 else:
                     print("Error: register not found")
                     exit()
-                var = line[index_add+2]
+                var = line[index_add + 2]
                 for k in var_lst:
                     if k == var:
                         typeD(inst, reg1, getVar(line_lst, var))
 
-
         for element in typeE_list:
             if element in line:
-                index_add=line.index(element)
+                index_add = line.index(element)
                 inst = line[index_add]
-                lab = line[index_add+1] + ':'
-                for k in lbl_lst:
-                    if lab == k:
+                lab = line[index_add + 1] + ':'
+                for k in line_lst:
+                    if lab in k:
                         typeE(inst, getLbl(line_lst, k))
-
 
         for element in typeF_list:
             if element in line:
-                index_add=line.index(element)
+                index_add = line.index(element)
                 inst = line[index_add]
                 typeF(inst)
 
+        for element in typeM_list:
+            if element in line:
+                index_add = line.index(element)
+                if line[index_add + 1] in regAdd:
+                    reg1 = line[index_add+1]
+                else:
+                    print("Error: register not found")
+                    exit()
+                if '$' in line[index_add + 2]:
+                    inst = 'mov_imm'
+                    num = line[index_add + 2]
+                    imm = int(num.replace('$', ''))
+                    typeB(inst, reg1, imm)
+                elif line[index_add + 1] in regAdd:
+                    inst = 'mov_reg'
+                    reg2 = line[index_add+2]
+                    typeC(inst, reg1, reg2)
+                else:
+                    print("Error: invalid syntax")
+                    exit()
 
-        if line[0] == 'mov':
-            reg1 = line[1]
-            if '$' in line[2]:
-                inst = 'mov_imm'
-                num = line[2]
-                imm = int(num.replace('$', ''))
-                typeB(inst, reg1, imm)
-            else:
-                inst = 'mov_reg'
-                reg2 = line[2]
-                typeC(inst, reg1, reg2)
 
         if line[0] == 'var':
-            var_lst.append(line[1])    #error check
+            var_lst.append(line[1])  # error check
 
         for k in line:
             if ':' in k:
                 for element in opDict.keys():
-                    if element+":" == k:
+                    if element + ":" == k:
                         print("Error: cannot use instructions as label names")
                         exit()
                 lbl_lst.append(k)
@@ -208,9 +222,13 @@ def getVar(a, x):
 
 def getLbl(a, lb):
     lblDict = {}
-    for i in a:
+    lst = []
+    for k in a:
+        if 'var' not in k:
+            lst.append(k)
+    for i in lst:
         if ':' in i:
-            lblDict[i] = a.index(i)
+            lblDict[i] = lst.index(i)
     return lblDict[lb]
 
 

@@ -13,6 +13,7 @@ def main():
     var_lst = []
     lbl_lst = []
     typeA_list=['add','sub','mul','xor','or','and']
+    typeB_list=['ls','rs']
     typeC_list=['div','not','cmp']
     typeD_list=['ld','st']
     typeE_list=['jmp','je','jgt','jlt']
@@ -24,9 +25,18 @@ def main():
             if line == "":
                 break
             line_lst.append(line)
+            j = line.strip()
+            line = j.split()
+            for k in line:
+                if ':' in k:
+                    for element in opDict.keys():
+                        if element+":" == k:
+                            print("Error: cannot use instructions as label names")
+                            exit()
+                    lbl_lst.append(k)
         except EOFError:
             break
-
+    print(lbl_lst)
     for i in line_lst:
         i = i.strip()
         line = i.split()
@@ -115,7 +125,10 @@ def main():
                 lab = line[index_add+1] + ':'
                 for k in lbl_lst:
                     if lab == k:
-                        typeE(inst, getLbl(line_lst, k))
+                        print(line)
+                        print(line_lst)
+                        typeE(inst, getLbl(line_lst, lab))
+
 
 
         for element in typeF_list:
@@ -139,14 +152,16 @@ def main():
 
         if line[0] == 'var':
             var_lst.append(line[1])    #error check
-
+        
         for k in line:
-            if ':' in k:
-                for element in opDict.keys():
-                    if element+":" == k:
-                        print("Error: cannot use instructions as label names")
-                        exit()
-                lbl_lst.append(k)
+                if ':' in k:
+                    for element in opDict.keys():
+                        if element+":" == k:
+                            print("Error: cannot use instructions as label names")
+                            exit()
+                    lbl_lst.append(k)
+
+        
 
 
 def typeA(inst, reg1, reg2, reg3):
@@ -207,10 +222,15 @@ def getVar(a, x):
 
 def getLbl(a, lb):
     lblDict = {}
+    
     for i in a:
+        i=i.strip()
+        i=i.split()
         if ':' in i:
             lblDict[i] = a.index(i)
+    print(lblDict)
     return lblDict[lb]
+
 
 
 if __name__ == "__main__":
