@@ -26,8 +26,8 @@ def main():
             line_list[num] = k
             num += 1
 
-        except:
-            pass
+        except EOFError:
+            break
 
     for l in line_list:
         l = l.strip()
@@ -116,6 +116,7 @@ def typeB(l, inst):
     elif inst == '01001':
         x = int(reg1, 2) >> int(imm, 2)
     regDict[rd] = x
+    regDict['111'] = '0000000000000000'
 
 
 def typeC(l, inst):
@@ -125,11 +126,14 @@ def typeC(l, inst):
     reg2 = regDict[op2]
     if inst == '00011':
         regDict[op1] = reg2
+        regDict['111'] = '0000000000000000'
     elif inst == '00111':
         regDict['000'] = format(int(reg1, 2) // int(reg2, 2), '016b')
         regDict['001'] = format(int(reg1, 2) % int(reg2, 2), '016b')
+        regDict['111'] = '0000000000000000'
     elif inst == '01101':
         regDict[reg1] = ''.join(['1' if i == '0' else '0' for i in reg2])
+        regDict['111'] = '0000000000000000'
     elif inst == '01110':
         ele1 = int(reg1, 2)
         ele2 = int(reg2, 2)
@@ -146,14 +150,12 @@ def typeD(l, inst, line_list):
     mem_add = l[0][8:16]
     adr = int(mem_add, 2)
     if inst == '00101':  # st
-        for i in line_list:
-            if i == adr:
-                line_list[i] = regDict[rd]
+        line_list[adr]=regDict[rd]
+
     elif inst == '00100':  # ld
-        for i in line_list:
-            if i == adr:
-                val = line_list[i]
-        regDict[rd] = val
+        regDict[rd]=line_list[adr]
+    
+    regDict['111'] = '0000000000000000'
 
 
 def typeE(l, inst):
@@ -170,10 +172,12 @@ def typeE(l, inst):
     if inst == '10001':  # greater
         if regDict['111'] == '0000000000000010':
             pc = adr
+    regDict['111'] = '0000000000000000'
 
 
 def typeF(l, inst):
     flag = 1
+    regDict['111'] = '0000000000000000'
 
 
 def out(pc):
