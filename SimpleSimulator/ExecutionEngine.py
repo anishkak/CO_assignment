@@ -7,27 +7,63 @@ opDict = {'add': '00000', 'sub': '00001', 'mov_imm': '00010', 'mov_reg': '00011'
 regDict = {'000': '0000000000000000', '001': '0000000000000000', '010': '0000000000000000', '011': '0000000000000000',
            '100': '0000000000000000', '101': '0000000000000000', '110': '0000000000000000', '111': '0000000000000000'}
 
+memDict = {}
+
+pc = 0
+
 
 def main():
+    global pc
+    flag = 0
     line_list = []
+    for i in range(257):
+        line_list[i] = 0
     num = 0
     while num < 257:
         try:
             line = input()
-            if line == "":
-                break
-            line_list.append(line)
+            k = line + " " + str(num)
+            line_list[num] = k
             num += 1
+
         except:
             pass
 
     for l in line_list:
-        if l[0:5] in ['00000', '00001', '00110', '01010', '01011', '01100']:
-            inst = l[0:5]
-            typeA(l, inst)
-        if l[0:5] in ['01000', '01001', '00010']:
-            inst = l[0:5]
-            typeB(l, inst)
+        while flag == 0:
+            if pc == l[-1]:
+                if l[0:5] in ['00000', '00001', '00110', '01010', '01011', '01100']:
+                    inst = l[0:5]
+                    typeA(l, inst)
+                    out()
+                    pc = l[-1]
+                if l[0:5] in ['01000', '01001', '00010']:
+                    inst = l[0:5]
+                    typeB(l, inst)
+                    out()
+                    pc = l[-1]
+                if l[0:5] in ['00011', '00111', '01101', '01110']:
+                    inst = l[0:5]
+                    typeC(l, inst)
+                    out()
+                    pc = l[-1]
+                if l[0:5] in ['00100', '00101']:
+                    inst = l[0:5]
+                    typeD(l, inst, line_list)
+                    out()
+                    pc = l[-1]
+                if l[0:5] in ['01111', '10000', '10001', '10010']:
+                    inst = l[0:5]
+                    typeE(l, inst)
+                    out()
+                    pc = l[-1]
+                if l[0:5] in ['10011']:
+                    inst = l[0:5]
+                    typeF(l, inst)
+                    out()
+                    pc = l[-1]
+
+    print(line_list)
 
 
 def typeA(l, inst):
@@ -55,7 +91,7 @@ def typeA(l, inst):
     elif inst == '01011':
         x = int(reg2, 2) | int(reg3, 2)
         y = format(x, '016b')
-    if x < 0 or x > 2**16:
+    if x < 0 or x > 2 ** 16:
         regDict['111'] = '0000000000001000'
         regDict[rd] = y[-16:]
     else:
@@ -103,36 +139,44 @@ def typeD(l, inst, line_list):
     rd = l[5:8]
     mem_add = l[8:16]
     adr = int(mem_add, 2)
-    if inst == '00100':
+    if inst == '00101':  # st
+        for i in line_list:
+            if i == adr:
+                line_list[i] = regDict[rd]
+    elif inst == '00100':  # ld
         for i in line_list:
             if i == adr:
                 val = line_list[i]
         regDict[rd] = val
-    elif inst == '00101':
-        for i in line_list:
-            if i == adr:
-                line_list[i] = regDict[rd]
 
-def typeE(l, inst, line_list):
+
+def typeE(l, inst):
+    global pc
     mem_add = l[8:16]
-    if inst == '01111':  #uncon
-
-
-    if inst == '10010':  #eq
+    adr = int(mem_add, 2)
+    if inst == '01111':  # uncon
+        pc = adr
+    if inst == '10010':  # eq
         if regDict['111'] == '0000000000000001':
-
-
-    if inst == '10000':  #less
+            pc = adr
+    if inst == '10000':  # less
         if regDict['111'] == '0000000000000100':
-
-
-    if inst == '10001':  #greater
+            pc = adr
+    if inst == '10001':  # greater
         if regDict['111'] == '0000000000000010':
+            pc = adr
 
 
+def typeF(l, inst):
+    flag = 1
 
 
-
+def out():
+    print_pc = format(pc, '08b')
+    res_str = ''
+    for i in regDict.values():
+        res_str = res_str + i + ' '
+    print(print_pc + ' ' + res_str)
 
 
 if __name__ == "__main__":
