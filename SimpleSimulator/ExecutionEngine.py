@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
 opDict = {'add': '00000', 'sub': '00001', 'mov_imm': '00010', 'mov_reg': '00011',
           'ld': '00100', 'st': '00101', 'mul': '00110', 'div': '00111',
           'rs': '01000', 'ls': '01001', 'xor': '01010', 'or': '01011',
@@ -11,8 +14,10 @@ memDict = {}
 
 
 def main():
+    traces = []
     pc = 0
     flag = 0
+    cycle = 0
     line_list = []
     for i in range(256):
         line_list.append(format(0, '016b'))
@@ -32,7 +37,9 @@ def main():
     for l in line_list:
         l = l.strip()
         l = l.split()
+        
         if pc == int(l[-1]):
+            traces.append([cycle, pc])
             if l[0][0:5] == '00000' or l[0][0:5] == '00001' or l[0][0:5] == '00110' or l[0][0:5] == '01010' or l[0][0:5] == '01011' or l[0][0:5] == '01100':
                 inst = l[0][0:5]
                 typeA(l, inst)
@@ -50,8 +57,9 @@ def main():
                 pc += 1
             if l[0][0:5] == '00100' or l[0][0:5] == '00101':
                 inst = l[0][0:5]
-                typeD(l, inst, line_list)
+                typeD(l, inst, line_list, traces, cycle)
                 out(pc)
+
                 pc += 1
             if l[0][0:5] == '01111' or l[0][0:5] == '10000' or l[0][0:5] == '10001' or l[0][0:5] == '10010':
                 inst = l[0][0:5]
@@ -62,8 +70,20 @@ def main():
                 inst = l[0][0:5]
                 typeF(l, inst)
                 out(pc)
-                pc += 1
+                pc+=1
+                
+            cycle += 1
+
     mem_dump(line_list)
+    cycle_list = []
+    pc_list = []
+
+    for i in range(len(traces)):
+        cycle_list.append(traces[i][0])
+        pc_list.append(traces[i][1])
+    plt.scatter(cycle_list, pc_list)
+    plt.show()
+
     exit()
 
 
@@ -145,7 +165,7 @@ def typeC(l, inst):
             regDict['111'] = '0000000000000100'
 
 
-def typeD(l, inst, line_list):
+def typeD(l, inst, line_list, traces, cycle):
     rd = l[0][5:8]
     mem_add = l[0][8:16]
     adr = int(mem_add, 2)
@@ -156,6 +176,7 @@ def typeD(l, inst, line_list):
         regDict[rd]=line_list[adr]
     
     regDict['111'] = '0000000000000000'
+    traces.append([cycle, adr])
 
 
 def typeE(l, inst):
