@@ -31,7 +31,7 @@ def main():
             i += 1
             line = line.strip()
             if line == "":
-                break
+                continue
             line_lst.append(line+" "+str(i))
 
         except EOFError:
