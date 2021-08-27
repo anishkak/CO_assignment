@@ -12,10 +12,12 @@ regDict = {'000': '0000000000000000', '001': '0000000000000000', '010': '0000000
 
 memDict = {}
 
+pc = 0
 
 def main():
     traces = []
-    pc = 0
+    global pc
+    pd = 0
     flag = 0
     cycle = 0
     line_list = []
@@ -37,7 +39,6 @@ def main():
     for l in line_list:
         l = l.strip()
         l = l.split()
-        
         if pc == int(l[-1]):
             traces.append([cycle, pc])
             if l[0][0:5] == '00000' or l[0][0:5] == '00001' or l[0][0:5] == '00110' or l[0][0:5] == '01010' or l[0][0:5] == '01011' or l[0][0:5] == '01100':
@@ -59,28 +60,27 @@ def main():
                 inst = l[0][0:5]
                 typeD(l, inst, line_list, traces, cycle)
                 out(pc)
-
                 pc += 1
             if l[0][0:5] == '01111' or l[0][0:5] == '10000' or l[0][0:5] == '10001' or l[0][0:5] == '10010':
                 inst = l[0][0:5]
+                #out(pc)
+                pd = pc
                 typeE(l, inst)
-                out(pc)
-                pc += 1
+                out(pd)
             if l[0][0:5] == '10011':
                 inst = l[0][0:5]
                 typeF(l, inst)
                 out(pc)
-                pc+=1
-                
+                pc += 1
             cycle += 1
 
     mem_dump(line_list)
     cycle_list = []
     pc_list = []
 
-    for i in range(len(traces)):
-        cycle_list.append(traces[i][0])
-        pc_list.append(traces[i][1])
+    for i in traces:
+        cycle_list.append(i[0])
+        pc_list.append(i[1])
     plt.scatter(cycle_list, pc_list)
     plt.show()
 
@@ -132,9 +132,11 @@ def typeB(l, inst):
     if inst == '00010':
         x = format(int(imm, 2), '016b')
     elif inst == '01000':
-        x = int(reg1, 2) >> int(imm, 2)
+        y = int(reg1, 2) >> int(imm, 2)
+        x = format(y, '016b')
     elif inst == '01001':
-        x = int(reg1, 2) >> int(imm, 2)
+        y = int(reg1, 2) << int(imm, 2)
+        x = format(y, '016b')
     regDict[rd] = x
     regDict['111'] = '0000000000000000'
 
@@ -152,7 +154,7 @@ def typeC(l, inst):
         regDict['001'] = format(int(reg1, 2) % int(reg2, 2), '016b')
         regDict['111'] = '0000000000000000'
     elif inst == '01101':
-        regDict[reg1] = ''.join(['1' if i == '0' else '0' for i in reg2])
+        regDict[op1] = ''.join(['1' if i == '0' else '0' for i in reg2])
         regDict['111'] = '0000000000000000'
     elif inst == '01110':
         ele1 = int(reg1, 2)
@@ -180,6 +182,7 @@ def typeD(l, inst, line_list, traces, cycle):
 
 
 def typeE(l, inst):
+    global pc
     mem_add = l[0][8:16]
     adr = int(mem_add, 2)
     if inst == '01111':  # uncon
@@ -187,12 +190,18 @@ def typeE(l, inst):
     if inst == '10010':  # eq
         if regDict['111'] == '0000000000000001':
             pc = adr
+        else:
+            pc += 1
     if inst == '10000':  # less
         if regDict['111'] == '0000000000000100':
             pc = adr
+        else:
+            pc += 1
     if inst == '10001':  # greater
         if regDict['111'] == '0000000000000010':
             pc = adr
+        else:
+            pc += 1
     regDict['111'] = '0000000000000000'
 
 
