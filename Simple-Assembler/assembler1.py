@@ -24,13 +24,14 @@ def main():
     typeM_list = ['mov']
     i = 0
     flag = 0
+    lbl_count = 0
     while True:
         try:
             line = input()
             i += 1
             line = line.strip()
             if line == "":
-                continue
+                break
             line_lst.append(line+" "+str(i))
 
         except EOFError:
@@ -43,11 +44,20 @@ def main():
             if ':' in k:
                 lbl_lst.append(k)
 
-
     for i in line_lst:
         i = i.strip()
         line = i.split()
+        lbl_count=0
+        for k in line:
+            if ':' in k:
+                lbl_count += 1
+                if line[1] == line[-1]:
+                    print("Error at line", line[-1], ": No Instruction after Label")
+                    exit()
 
+        if lbl_count > 1:
+            print("Error at line", line[-1], ": Multiple Labels Used in the Same Line")
+            exit()
  
         if line[0] not in inst_list:
             if 'var' not in line[0] and ':' not in line[0]:
@@ -55,7 +65,7 @@ def main():
                 exit()
 
         if line[0] == 'var':
-            if flag==0:
+            if flag == 0:
                 var_lst.append(line[1])
             else:
                 print("error at line "+ line[-1]+": variable should be defined at beginning")
@@ -133,7 +143,7 @@ def main():
                             exit()
                         list_add.append(line[index_add + i])
                     else:
-                        print("Error at line " + line[-1]+": register not found")
+                        print("Error at line " + line[-1]+": Register not found")
                         exit()
                 if len(list_add) == 2:
                     reg1 = list_add[0]
@@ -260,9 +270,8 @@ def main():
                     if element + ":" == k:
                         print("Error: Cannot use instructions as label names")
                         exit()
-
                 lbl_lst.append(k)
-                flag=1
+                flag = 1
 
         if 'hlt' not in line_lst[-1]:
             print("Error: hlt not being used as the last instruction")

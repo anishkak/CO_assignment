@@ -28,7 +28,7 @@ def main():
         try:
             line = input()
             if line == "":
-                break
+                continue
             k = line + " " + str(num)
             line_list[num] = k
             num += 1
