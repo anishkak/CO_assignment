@@ -28,7 +28,7 @@ def main():
         try:
             line = input()
             if line == "":
-                continue
+                break
             k = line + " " + str(num)
             line_list[num] = k
             num += 1
@@ -117,9 +117,12 @@ def typeA(l, inst):
     elif inst == '01011':
         x = int(reg2, 2) | int(reg3, 2)
         y = format(x, '016b')
-    if x < 0 or x > 2 ** 16:
+    if x > 2 ** 16:
         regDict['111'] = '0000000000001000'
         regDict[rd] = y[-16:]
+    elif x < 0:
+        regDict['111'] = '0000000000001000'
+        regDict[rd] = '0000000000000000'
     else:
         regDict['111'] = '0000000000000000'
         regDict[rd] = y
